@@ -32,8 +32,14 @@ function MenuDynamic() {
       roles: ["665a1f2b40fd3a12b3e77612"]
     },
     {
-      title: "Reportes",
-      path: "/reports",
+      title: "Productos",
+      path: "/products",
+      icon: "BarChartOutlined",
+      roles: ["665a1f2b40fd3a12b3e77611", "665a1f2b40fd3a12b3e77612"]
+    },
+    {
+      title: "Ordenes",
+      path: "/orders",
       icon: "BarChartOutlined",
       roles: ["665a1f2b40fd3a12b3e77611", "665a1f2b40fd3a12b3e77612"]
     }
