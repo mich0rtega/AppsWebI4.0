@@ -12,11 +12,11 @@ export interface IRol extends Document{
 
 const rolSchema = new Schema<IRol>({
     createDate:{
-     Type:Date,
+     type:Date,
      default:Date.now
     },
     updateDate:{
-     Type:Date,
+     type:Date,
      default:Date.now
     }, 
     status:{

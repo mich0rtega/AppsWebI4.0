@@ -91,64 +91,68 @@ export const getUserByUsername = async (req:Request,res:Response)=>{
 }
 
 export const saveUser = async (req: Request, res: Response) => {
-  try { //COLOCAR TRY Y CATCH A TOD0
-    const { name, username, password, phone, email, role } = req.body;
-    const hashedPassword = await bcrypt.hash(password, 10); // 10 es el saltRounds
+  try {
+    const { name, username, password, phone, email, roles } = req.body;
+
+    if (!Array.isArray(roles) || roles.length === 0) {
+      return res.status(400).json({ message: "Debe asignarse al menos un rol" });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
     const newUser = new User({
-     name,
-     username,
-     password: hashedPassword,
+      name,
+      username,
+      password: hashedPassword,
       phone,
       email,
-     role
+      roles, 
     });
 
-    const user = await newUser.save(); 
+    const user = await newUser.save();
     return res.json({ user });
   } catch (error) {
-    console.log("Error ocurrió en SAVEUSER", error);
+    console.error("Error en saveUser:", error);
     return res.status(500).json({ message: "Error al guardar usuario" });
   }
 };
+export const updateUser = async (req: Request, res: Response) => {
+  try {
+    const { userId } = req.params;
+    const { emailUser, phone, password, name, roles } = req.body;
 
-export const updateUser = async(req:Request, res:Response)=>{
-  try{
-      const{userId}=req.params;
-  const{emailUser,phone,password,name,role} = req.body;
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "Usuario no encontrado" });
+    }
 
-  const user = await User.findById(userId);
-//Validar que exista
-  if (!user){
-    return res.status(404).json({
-      message: "Usuario no encontrado"
-    });
+    if (emailUser && emailUser !== user.email) {
+      const existingEmail = await User.findOne({ email: emailUser });
+      if (existingEmail) {
+        return res.status(409).json({ message: "El correo ya está registrado" });
+      }
+      user.email = emailUser;
+    }
+
+    if (password != null) {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      user.password = hashedPassword;
+    }
+
+    user.name = name ?? user.name;
+    user.phone = phone ?? user.phone;
+
+    if (Array.isArray(roles) && roles.length > 0) {
+      user.roles = roles;
+    }
+
+    const updatedUser = await user.save();
+    return res.json({ updatedUser });
+  } catch (error) {
+    console.error("Error en updateUser:", error);
+    return res.status(500).json({ message: "Error al actualizar usuario", error });
   }
-
-  const userEmail = await User.find({email:emailUser})
-//Validar que no se repita correo
-  if (userEmail && userEmail.length>0){
-    return res.status(426).json({
-      message: "El correo ya esta registrado"
-    });
-  } 
-  
-  user.email=emailUser;
-  //user.password = password!= null ? password : user.password; //if ternario para que no se mande nullo o vacio el dato
-  if (password != null) {
-  const hashedPassword = await bcrypt.hash(password, 10);
-  user.password = hashedPassword;
-}
-  user.role = role;
-  user.phone = phone;
-  user.name = name;
-
-  const updateUser = await user.save();
-  return res.json({updateUser});
-  }catch(error){
-    console.log('Error en update User',error);
-    return res.status(426).json({error});
-  }
-}
+};
 
 export const deleteUser= async(req:Request,res:Response)=>{
   const {userId} = req.params;

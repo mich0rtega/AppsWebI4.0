@@ -25,7 +25,7 @@ const productSchema  = new Schema<IProduct>({
         type:String,
     },
     stock:{
-        type:String,
+        type:Number,
         required:true,
     }
 });
